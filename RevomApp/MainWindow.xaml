@@ -5,8 +5,18 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RevomApp"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Canvas Name="myCanvas" Background="Black" Focusable="True"
-            MouseLeftButtonDown="Add_or_Remove_Items">
-    </Canvas>
+        Title="MainWindow" WindowState="Maximized" WindowStyle="SingleBorderWindow" Height="450" Width="800" >
+
+
+    <DockPanel Name="myDockPanel">
+        <Menu DockPanel.Dock="Top" Height="50">
+            <Button x:Name="Button_Save" Content="Save" Background="#FFF3EE11" HorizontalAlignment="Left" VerticalAlignment="Top" Click="Button_Save_Click" Height="39" Width="60"/>
+            <Button x:Name="Button_Load" Content="Load" Background="#FFF38311" HorizontalAlignment="Center" VerticalAlignment="Center" Click="Button_Load_Click" Height="39" Width="60"/>
+
+        </Menu>
+        <Canvas Name="myCanvas" Background="Black" Focusable="True" AllowDrop="True" MouseLeftButtonDown="Add_or_Remove_Items">
+            
+        </Canvas>
+    </DockPanel>
+    
 </Window>
