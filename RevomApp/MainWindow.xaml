@@ -5,13 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RevomApp"
         mc:Ignorable="d"
-        Title="MainWindow" WindowState="Maximized" WindowStyle="SingleBorderWindow" Height="450" Width="800" >
+        Title="RevomApp, the tool to create Revomaze designs" WindowState="Maximized" WindowStyle="SingleBorderWindow" Height="450" Width="800" >
 
 
     <DockPanel Name="myDockPanel">
         <Menu DockPanel.Dock="Top" Height="50">
-            <Button x:Name="Button_Save" Content="Save" Background="#FFF3EE11" HorizontalAlignment="Left" VerticalAlignment="Top" Click="Button_Save_Click" Height="39" Width="60"/>
-            <Button x:Name="Button_Load" Content="Load" Background="#FFF38311" HorizontalAlignment="Center" VerticalAlignment="Center" Click="Button_Load_Click" Height="39" Width="60"/>
+            <Button x:Name="Button_Save" Content="Save" Background="#FFF3EE11" HorizontalAlignment="Left" VerticalAlignment="Top" Click="Save_Canvas" Height="39" Width="60"/>
+            <Button x:Name="Button_Load" Content="Load" Background="#FFF38311" HorizontalAlignment="Center" VerticalAlignment="Center" Click="Load_Canvas" Height="39" Width="60"/>
+            <Button x:Name="Button_Clear" Content="Clear" Background="#FFF31111" HorizontalAlignment="Center" VerticalAlignment="Center" Click="Clear_Canvas" Height="39" Width="60"/>
 
         </Menu>
         <Canvas Name="myCanvas" Background="Black" Focusable="True" AllowDrop="True" MouseLeftButtonDown="Add_or_Remove_Items">

@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -59,11 +60,11 @@ namespace RevomApp
             }
         }
 
-        private void Button_Save_Click(object sender, RoutedEventArgs e)
+        private void Save_Canvas(object sender, RoutedEventArgs e)
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Filter = "RevomApp Files | *.xaml";
-            saveFileDialog.DefaultExt = "xaml";
+            saveFileDialog.Filter = "RevomApp Files | *.revomap";
+            saveFileDialog.DefaultExt = "revomap";
 
             if (saveFileDialog.ShowDialog() == true)
             {
@@ -75,22 +76,54 @@ namespace RevomApp
             }
         }
 
-        private void Button_Load_Click(object sender, RoutedEventArgs e)
+        private void Load_Canvas(object sender, RoutedEventArgs e)
         {
+
+            //clear current canvas
+            Clear_Canvas(sender, e);
+
+            //get filepath by userdialog
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "RevomApp Files | *.xaml";
-            openFileDialog.DefaultExt = "xaml";
+            openFileDialog.Filter = "RevomApp Files | *.revomap";
+            openFileDialog.DefaultExt = "revomap";
 
             if (openFileDialog.ShowDialog() == true)
             {
-                //myCanvas.Children = File.ReadAllText(openFileDialog.FileName);
+                //get Canvas from file
                 FileStream fs = File.Open(openFileDialog.FileName, FileMode.Open, FileAccess.Read);
                 Canvas savedCanvas = System.Windows.Markup.XamlReader.Load(fs) as Canvas;
                 fs.Close();
 
-                myDockPanel.Children.Add(savedCanvas);
-            }
                 
+
+                //insert elements from savedCanvas into current canvas
+                List<UIElement> temp = new List<UIElement>();
+                foreach (UIElement element in savedCanvas.Children)
+                {
+                    temp.Add(element);
+                }
+                savedCanvas.Children.Clear();
+                foreach (UIElement el in temp)
+                {
+
+                    this.myCanvas.Children.Add(el);
+                }
+            }
+        }
+        private void Clear_Canvas(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult result = System.Windows.MessageBox.Show("Would you like to save your changes?", "Save your Changes?", System.Windows.MessageBoxButton.YesNoCancel);
+            switch (result)
+            {
+                case MessageBoxResult.Yes:
+                    Save_Canvas(sender, e);
+                    break;
+                case MessageBoxResult.No:
+                    myCanvas.Children.Clear();
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }
