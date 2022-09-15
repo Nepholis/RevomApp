@@ -56,7 +56,6 @@ namespace RevomApp
                     Height = 100,
                     Background = customColor,
                     BorderThickness = new Thickness(3,3,3,3),
-                    BorderBrush = Brushes.White,
                     AllowDrop = true,
                     
             };
@@ -76,7 +75,6 @@ namespace RevomApp
                 Border activeBorder = (Border)e.OriginalSource;
 
                 myCanvas.Children.Remove(activeBorder);
-                adorner.Remove(new BorderAdorner(activeBorder));
             }
         }
 
