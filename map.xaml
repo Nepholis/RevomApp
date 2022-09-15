@@ -1,1 +1,0 @@
-<Canvas Background="#FF000000" Name="myCanvas" AllowDrop="True" Focusable="True" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"><Rectangle Fill="#FF037D83" Stroke="#FFFFFFFF" StrokeThickness="3" Width="50" Height="50" Canvas.Left="514.2" Canvas.Top="285" /></Canvas>

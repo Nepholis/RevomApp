@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RevomApp"
         mc:Ignorable="d"
-        Title="RevomApp, the tool to create Revomaze designs" WindowState="Maximized" WindowStyle="SingleBorderWindow" Height="450" Width="800" >
+        Title="RevomApp, the tool to create Revomaze designs" WindowState="Maximized" WindowStyle="SingleBorderWindow" Height="450" Width="800" Icon="/Icons/Revo_Logo.ico" >
 
 
     <DockPanel Name="myDockPanel">
@@ -15,7 +15,7 @@
             <Button x:Name="Button_Clear" Content="Clear" Background="#FFF31111" HorizontalAlignment="Center" VerticalAlignment="Center" Click="Clear_Canvas" Height="39" Width="60"/>
 
         </Menu>
-        <Canvas Name="myCanvas" Background="Black" Focusable="True" AllowDrop="True" MouseLeftButtonDown="Add_or_Remove_Items">
+        <Canvas Name="myCanvas" Background="Black" Focusable="True" AllowDrop="True" MouseLeftButtonUp="Add_or_Remove_Items" MouseRightButtonUp="Remove_Selected_Item">
             
         </Canvas>
     </DockPanel>

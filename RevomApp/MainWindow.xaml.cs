@@ -27,36 +27,56 @@ namespace RevomApp
 
         Brush customColor;
         Random r = new Random();
+        AdornerLayer adorner;
 
         public MainWindow()
         {
             InitializeComponent();
+            Loaded += (sender, e) =>
+            {
+                adorner = AdornerLayer.GetAdornerLayer(myCanvas);
+            };
         }
 
         private void Add_or_Remove_Items(object sender, MouseButtonEventArgs e)
         {
-            if (e.OriginalSource is Rectangle)
+            if (e.OriginalSource is Border)
             {
-                Rectangle activeRectangle = (Rectangle)e.OriginalSource;
+                Border activeBorder = (Border)e.OriginalSource;
 
-                myCanvas.Children.Remove(activeRectangle);
+                myCanvas.Children.Remove(activeBorder);
+                adorner.Remove(new BorderAdorner(activeBorder));
             }
             else
             {
                 customColor = new SolidColorBrush(Color.FromRgb((byte)r.Next(1, 255), (byte)r.Next(1, 255), (byte)r.Next(1, 255)));
-                Rectangle newRectangle = new Rectangle
+                Border newBorder = new Border()
                 {
-                    Width = 50,
-                    Height = 50,
-                    Fill = customColor,
-                    StrokeThickness = 3,
-                    Stroke = Brushes.White
+                    Width = 100,
+                    Height = 100,
+                    Background = customColor,
+                    BorderThickness = new Thickness(3,3,3,3),
+                    BorderBrush = Brushes.White,
+                    AllowDrop = true,
+                    
+            };
+                Canvas.SetLeft(newBorder, Mouse.GetPosition(myCanvas).X - newBorder.Width / 2);
+                Canvas.SetTop(newBorder, Mouse.GetPosition(myCanvas).Y - newBorder.Height / 2);
 
-                };
-                Canvas.SetLeft(newRectangle, Mouse.GetPosition(myCanvas).X - newRectangle.Width / 2);
-                Canvas.SetTop(newRectangle, Mouse.GetPosition(myCanvas).Y - newRectangle.Height / 2);
 
-                myCanvas.Children.Add(newRectangle);
+                myCanvas.Children.Add(newBorder);
+                adorner.Add(new BorderAdorner(newBorder));
+                
+            }
+        }
+        private void Remove_Selected_Item(object sender, MouseButtonEventArgs e)
+        {
+            if (e.OriginalSource is Border)
+            {
+                Border activeBorder = (Border)e.OriginalSource;
+
+                myCanvas.Children.Remove(activeBorder);
+                adorner.Remove(new BorderAdorner(activeBorder));
             }
         }
 
@@ -82,33 +102,38 @@ namespace RevomApp
             //clear current canvas
             Clear_Canvas(sender, e);
 
-            //get filepath by userdialog
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "RevomApp Files | *.revomap";
-            openFileDialog.DefaultExt = "revomap";
-
-            if (openFileDialog.ShowDialog() == true)
+            //if canvas was cleared
+            if(myCanvas.Children.Count == 0) 
             {
-                //get Canvas from file
-                FileStream fs = File.Open(openFileDialog.FileName, FileMode.Open, FileAccess.Read);
-                Canvas savedCanvas = System.Windows.Markup.XamlReader.Load(fs) as Canvas;
-                fs.Close();
+                //get filepath by userdialog
+                OpenFileDialog openFileDialog = new OpenFileDialog();
+                openFileDialog.Filter = "RevomApp Files | *.revomap";
+                openFileDialog.DefaultExt = "revomap";
+
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    //get Canvas from file
+                    FileStream fs = File.Open(openFileDialog.FileName, FileMode.Open, FileAccess.Read);
+                    Canvas savedCanvas = System.Windows.Markup.XamlReader.Load(fs) as Canvas;
+                    fs.Close();
 
                 
 
-                //insert elements from savedCanvas into current canvas
-                List<UIElement> temp = new List<UIElement>();
-                foreach (UIElement element in savedCanvas.Children)
-                {
-                    temp.Add(element);
-                }
-                savedCanvas.Children.Clear();
-                foreach (UIElement el in temp)
-                {
+                    //insert elements from savedCanvas into current canvas
+                    List<UIElement> temp = new List<UIElement>();
+                    foreach (UIElement element in savedCanvas.Children)
+                    {
+                        temp.Add(element);
+                    }
+                    savedCanvas.Children.Clear();
+                    foreach (UIElement el in temp)
+                    {
 
-                    this.myCanvas.Children.Add(el);
+                        this.myCanvas.Children.Add(el);
+                    }
                 }
             }
+            
         }
         private void Clear_Canvas(object sender, RoutedEventArgs e)
         {
