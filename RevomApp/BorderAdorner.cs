@@ -1,10 +1,12 @@
-﻿using System;
+﻿
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace RevomApp
 {
@@ -12,16 +14,20 @@ namespace RevomApp
     {
         private double angle = 0.0;
         private Point transformOrigin = new Point(0, 0);
-        private Border childElement;
+        private Rectangle childElement;
         private VisualCollection visualChilderns;
-        public Thumb leftTop, rightTop, leftBottom, rightBottom;
+        public Thumb leftTop, rightTop, leftBottom, rightBottom, left, right, top, bottom;
+        
         private bool dragStarted = false;
         private bool isHorizontalDrag = false;
 
         public BorderAdorner(UIElement element) : base(element)
         {
             visualChilderns = new VisualCollection(this);
-            childElement = element as Border;
+            childElement = element as Rectangle;
+            childElement.Cursor = Cursors.SizeAll;
+
+            // define ThumbParts and add DragDelta behaviour
             CreateThumbPart(ref leftTop);
             leftTop.DragDelta += (sender, e) =>
             {
@@ -42,7 +48,7 @@ namespace RevomApp
             {
                 double hor = e.HorizontalChange;
                 double vert = e.VerticalChange;
-                System.Diagnostics.Debug.WriteLine(hor + "," + vert + "," + (Math.Abs(hor) > Math.Abs(vert)) + "," + childElement.Height + "," + childElement.Width + "," + dragStarted + "," + isHorizontalDrag);
+
                 if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
                 {
                     if (dragStarted) isHorizontalDrag = Math.Abs(hor) > Math.Abs(vert);
@@ -58,7 +64,7 @@ namespace RevomApp
             {
                 double hor = e.HorizontalChange;
                 double vert = e.VerticalChange;
-                System.Diagnostics.Debug.WriteLine(hor + "," + vert + "," + (Math.Abs(hor) > Math.Abs(vert)) + "," + childElement.Height + "," + childElement.Width + "," + dragStarted + "," + isHorizontalDrag);
+
                 if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
                 {
                     if (dragStarted) isHorizontalDrag = Math.Abs(hor) > Math.Abs(vert);
@@ -84,12 +90,73 @@ namespace RevomApp
                 dragStarted = false;
                 e.Handled = true;
             };
+            CreateThumbPart(ref left);
+            left.DragDelta += (sender, e) =>
+            {
+                double hor = e.HorizontalChange;
+                double vert = e.VerticalChange;
+                if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
+                {
+                    ResizeWidth(-hor);
+                }
+                ResizeX(hor);
+                e.Handled = true;
+            };
+            CreateThumbPart(ref right);
+            right.DragDelta += (sender, e) =>
+            {
+                double hor = e.HorizontalChange;
+                double vert = e.VerticalChange;
+
+                if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
+                {
+                    ResizeX(-hor);
+                }
+                ResizeWidth(hor);
+                e.Handled = true;
+            };
+            CreateThumbPart(ref top);
+            top.DragDelta += (sender, e) =>
+            {
+                double hor = e.HorizontalChange;
+                double vert = e.VerticalChange;
+                if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
+                {
+                    ResizeHeight(-vert);
+                }
+                ResizeY(vert);
+                e.Handled = true;
+            };
+            CreateThumbPart(ref bottom);
+            bottom.DragDelta += (sender, e) =>
+            {
+                double hor = e.HorizontalChange;
+                double vert = e.VerticalChange;
+
+                if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
+                {
+                    ResizeY(-vert);
+                }
+                ResizeHeight(vert);
+                e.Handled = true;
+            };
+            // define cursors
+            left.Cursor = Cursors.SizeWE;
+            right.Cursor = Cursors.SizeWE;
+            top.Cursor = Cursors.SizeNS;
+            bottom.Cursor = Cursors.SizeNS;
+            leftTop.Cursor = Cursors.SizeNWSE;
+            rightTop.Cursor = Cursors.SizeNESW;
+            leftBottom.Cursor = Cursors.SizeNESW;
+            rightBottom.Cursor = Cursors.SizeNWSE;
+
         }
-        public void CreateThumbPart(ref Thumb cornerThumb)
+        // create collision box of the Adorner
+        public void CreateThumbPart(ref Thumb newThumb)
         {
-            cornerThumb = new Thumb { Width = 20, Height = 20, Background = Brushes.Black };
-            cornerThumb.DragStarted += (object sender, DragStartedEventArgs e) => dragStarted = true;
-            visualChilderns.Add(cornerThumb);
+            newThumb = new Thumb { Width = 30, Height = 30, Opacity = 0 };
+            newThumb.DragStarted += (object sender, DragStartedEventArgs e) => dragStarted = true;
+            visualChilderns.Add(newThumb);
         }
 
         private void ResizeWidth(double e)
@@ -120,34 +187,55 @@ namespace RevomApp
             Canvas.SetLeft(childElement, Canvas.GetLeft(childElement) + deltaVertical * Math.Sin(-angle) - (transformOrigin.Y * deltaVertical * Math.Sin(-angle)));
             childElement.Height -= deltaVertical;
         }
-        //public void EnforceSize(FrameworkElement element)
-        //{
-        //    if (element.Width.Equals(Double.NaN))
-        //        element.Width = element.DesiredSize.Width;
-        //    if (element.Height.Equals(Double.NaN))
-        //        element.Height = element.DesiredSize.Height;
-        //    FrameworkElement parent = element.Parent as FrameworkElement;
-        //    if (parent != null)
-        //    {
-        //        element.MaxHeight = parent.ActualHeight;
-        //        element.MaxWidth = parent.ActualWidth;
-        //    }
-        //}
-        protected override Size ArrangeOverride(Size finalSize)
+
+        //Overrides the adorners visual points when the user resized the UIElement
+        //MS Doc SimpleCircleAdorner => https://docs.microsoft.com/de-de/dotnet/desktop/wpf/controls/how-to-implement-an-adorner?view=netframeworkdesktop-4.8
+        protected override void OnRender(DrawingContext drawingContext)
         {
-            base.ArrangeOverride(finalSize);
-            double desireWidth = AdornedElement.DesiredSize.Width;
-            double desireHeight = AdornedElement.DesiredSize.Height;
-            double adornerWidth = this.DesiredSize.Width;
-            double adornerHeight = this.DesiredSize.Height;
-            leftTop.Arrange(new Rect(-adornerWidth / 2 - 15, -adornerHeight / 2 - 15, adornerWidth, adornerHeight));
-            rightTop.Arrange(new Rect(desireWidth - adornerWidth / 2 + 15, -adornerHeight / 2 - 15, adornerWidth, adornerHeight));
-            leftBottom.Arrange(new Rect(-adornerWidth / 2 - 15, desireHeight - adornerHeight / 2 + 15, adornerWidth, adornerHeight));
-            rightBottom.Arrange(new Rect(desireWidth - adornerWidth / 2 + 15, desireHeight - adornerHeight / 2 + 15, adornerWidth, adornerHeight));
-            return finalSize;
+            Rect rec = new Rect(this.AdornedElement.DesiredSize);
+
+            // Some arbitrary drawing implements.
+            SolidColorBrush renderBrush = new SolidColorBrush(Colors.White);
+            renderBrush.Opacity = 1;
+            Pen renderPen = new Pen(new SolidColorBrush(Colors.Gray), 2.5);
+            double circleRadius = 5.0;
+            double rectLength = 30;
+            double collisionOffset = rectLength/2;
+
+            // Points pointing to the middle of each side.
+            Point m_top = new Point((rec.TopLeft.X + rec.TopRight.X) / 2, (rec.TopLeft.Y + rec.TopRight.Y) / 2);
+            Point m_bottom = new Point((rec.BottomLeft.X + rec.BottomRight.X) / 2, (rec.BottomLeft.Y + rec.BottomRight.Y) / 2);
+            Point m_left = new Point((rec.TopLeft.X + rec.BottomLeft.X) / 2, (rec.TopLeft.Y + rec.BottomLeft.Y) / 2);
+            Point m_right = new Point((rec.TopRight.X + rec.BottomRight.X) / 2, (rec.TopRight.Y + rec.BottomRight.Y) / 2);
+
+            // Arrange Collision Boxes at each side.
+            left.Arrange(new Rect(rec.TopLeft.X - collisionOffset, rec.TopLeft.Y, rectLength, rec.Height));
+            left.Height = rec.Height-rectLength;
+            right.Arrange(new Rect(rec.TopRight.X - collisionOffset, rec.TopRight.Y, rectLength, rec.Height));
+            right.Height = rec.Height-rectLength;
+            top.Arrange(new Rect(rec.TopLeft.X, rec.TopLeft.Y - collisionOffset, rec.Width, rectLength));
+            top.Width = rec.Width-rectLength;
+            bottom.Arrange(new Rect(rec.BottomLeft.X, rec.BottomLeft.Y -collisionOffset, rec.Width, rectLength));
+            bottom.Width = rec.Width-rectLength;
+
+            // Arrange Collision Boxes at each corner.
+            leftTop.Arrange(new Rect(rec.TopLeft.X - collisionOffset, rec.TopLeft.Y - collisionOffset, rectLength, rectLength));
+            rightTop.Arrange(new Rect(rec.TopRight.X - collisionOffset, rec.TopRight.Y - collisionOffset, rectLength, rectLength));
+            leftBottom.Arrange(new Rect(rec.BottomLeft.X - collisionOffset, rec.BottomLeft.Y - collisionOffset, rectLength, rectLength));
+            rightBottom.Arrange(new Rect(rec.BottomRight.X - collisionOffset, rec.BottomRight.Y - collisionOffset, rectLength, rectLength));
+
+            // Draw a circle at each corner.
+            drawingContext.DrawEllipse(renderBrush, renderPen, rec.TopLeft, circleRadius, circleRadius);
+            drawingContext.DrawEllipse(renderBrush, renderPen, rec.TopRight, circleRadius, circleRadius);
+            drawingContext.DrawEllipse(renderBrush, renderPen, rec.BottomLeft, circleRadius, circleRadius);
+            drawingContext.DrawEllipse(renderBrush, renderPen, rec.BottomRight, circleRadius, circleRadius);
+            // Draw a circle at the middle of each side.
+            drawingContext.DrawEllipse(renderBrush, renderPen, m_top, circleRadius, circleRadius);
+            drawingContext.DrawEllipse(renderBrush, renderPen, m_bottom, circleRadius, circleRadius);
+            drawingContext.DrawEllipse(renderBrush, renderPen, m_left, circleRadius, circleRadius);
+            drawingContext.DrawEllipse(renderBrush, renderPen, m_right, circleRadius, circleRadius);
         }
         protected override int VisualChildrenCount => visualChilderns.Count;
         protected override Visual GetVisualChild(int index) => visualChilderns[index];
-        //protected override void OnRender(DrawingContext drawingContext) => base.OnRender(drawingContext);
     }
 }

@@ -13,11 +13,12 @@
             <Button x:Name="Button_Save" Content="Save" Background="#FFF3EE11" HorizontalAlignment="Left" VerticalAlignment="Top" Click="Save_Canvas" Height="39" Width="60"/>
             <Button x:Name="Button_Load" Content="Load" Background="#FFF38311" HorizontalAlignment="Center" VerticalAlignment="Center" Click="Load_Canvas" Height="39" Width="60"/>
             <Button x:Name="Button_Clear" Content="Clear" Background="#FFF31111" HorizontalAlignment="Center" VerticalAlignment="Center" Click="Clear_Canvas" Height="39" Width="60"/>
+            <ToggleButton x:Name="Button_New_Rec" Content="New Rec" Background="#FF2BDF13" HorizontalAlignment="Left" VerticalAlignment="Top" Click="Change_Drawstate" Height="39" Width="60" IsChecked="False"/>
 
         </Menu>
-        <Canvas Name="myCanvas" Background="Black" Focusable="True" AllowDrop="True" MouseLeftButtonUp="Add_or_Remove_Items" MouseRightButtonUp="Remove_Selected_Item">
-            
+        <Canvas Name="myCanvas" Background="Black" Focusable="True" AllowDrop="True" MouseLeftButtonUp="Add_Item" MouseRightButtonUp="Remove_Selected_Item">
+
         </Canvas>
     </DockPanel>
-    
+
 </Window>
