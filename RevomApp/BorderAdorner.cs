@@ -27,7 +27,7 @@ namespace RevomApp
             childElement = element as Rectangle;
             childElement.Cursor = Cursors.SizeAll;
 
-            // define ThumbParts and add DragDelta behaviour
+            // define ThumbParts and add DragDelta+ShiftKey behaviour 
             CreateThumbPart(ref leftTop);
             leftTop.DragDelta += (sender, e) =>
             {
