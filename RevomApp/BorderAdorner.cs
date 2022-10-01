@@ -7,6 +7,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Xml;
 
 namespace RevomApp
 {
@@ -16,18 +17,31 @@ namespace RevomApp
         private Point transformOrigin = new Point(0, 0);
         private Rectangle childElement;
         private VisualCollection visualChilderns;
-        public Thumb leftTop, rightTop, leftBottom, rightBottom, left, right, top, bottom;
+        public Thumb center, leftTop, rightTop, leftBottom, rightBottom, left, right, top, bottom;
         
         private bool dragStarted = false;
         private bool isHorizontalDrag = false;
+
+        private Point _posInRect; //saves the MousePosition within a Rectangle before the movement
 
         public BorderAdorner(UIElement element) : base(element)
         {
             visualChilderns = new VisualCollection(this);
             childElement = element as Rectangle;
-            childElement.Cursor = Cursors.SizeAll;
 
             // define ThumbParts and add DragDelta+ShiftKey behaviour 
+            CreateThumbPart(ref center);
+            center.DragDelta += (sender, e) =>
+            {
+                double hor = e.HorizontalChange;
+                double vert = e.VerticalChange;
+
+                _posInRect = Mouse.GetPosition(childElement);
+
+                Canvas.SetLeft(childElement, Mouse.GetPosition(childElement.Parent as Canvas).X - _posInRect.X + hor);
+                Canvas.SetTop(childElement, Mouse.GetPosition(childElement.Parent as Canvas).Y - _posInRect.Y + vert );
+                e.Handled = true;
+            };
             CreateThumbPart(ref leftTop);
             leftTop.DragDelta += (sender, e) =>
             {
@@ -141,6 +155,7 @@ namespace RevomApp
                 e.Handled = true;
             };
             // define cursors
+            center.Cursor = Cursors.SizeAll;
             left.Cursor = Cursors.SizeWE;
             right.Cursor = Cursors.SizeWE;
             top.Cursor = Cursors.SizeNS;
@@ -188,6 +203,7 @@ namespace RevomApp
             childElement.Height -= deltaVertical;
         }
 
+
         //Overrides the adorners visual points when the user resized the UIElement
         //MS Doc SimpleCircleAdorner => https://docs.microsoft.com/de-de/dotnet/desktop/wpf/controls/how-to-implement-an-adorner?view=netframeworkdesktop-4.8
         protected override void OnRender(DrawingContext drawingContext)
@@ -201,6 +217,8 @@ namespace RevomApp
             double circleRadius = 5.0;
             double rectLength = 30;
             double collisionOffset = rectLength/2;
+
+            // Render White Rectangle Outline
 
             // Points pointing to the middle of each side.
             Point m_top = new Point((rec.TopLeft.X + rec.TopRight.X) / 2, (rec.TopLeft.Y + rec.TopRight.Y) / 2);
@@ -223,6 +241,11 @@ namespace RevomApp
             rightTop.Arrange(new Rect(rec.TopRight.X - collisionOffset, rec.TopRight.Y - collisionOffset, rectLength, rectLength));
             leftBottom.Arrange(new Rect(rec.BottomLeft.X - collisionOffset, rec.BottomLeft.Y - collisionOffset, rectLength, rectLength));
             rightBottom.Arrange(new Rect(rec.BottomRight.X - collisionOffset, rec.BottomRight.Y - collisionOffset, rectLength, rectLength));
+
+            // Arrange center CollisionBox for movability
+            center.Arrange(new Rect(rec.TopLeft.X+collisionOffset,rec.TopLeft.Y+collisionOffset, top.Width, left.Height));
+            center.Width = top.Width;
+            center.Height = left.Height;
 
             // Draw a circle at each corner.
             drawingContext.DrawEllipse(renderBrush, renderPen, rec.TopLeft, circleRadius, circleRadius);

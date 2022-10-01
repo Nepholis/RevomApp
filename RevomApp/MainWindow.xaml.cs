@@ -31,6 +31,8 @@ namespace RevomApp
         bool drawAllowed = false;
         bool IsMouseDown;
         private Point _posInRect; //saves the MousePosition within a Rectangle before the movement
+        BorderAdorner activeBorder;
+        Rectangle activeRect;
 
         public MainWindow()
         {
@@ -38,6 +40,7 @@ namespace RevomApp
             Loaded += (sender, e) => {
                 adornerLayer = AdornerLayer.GetAdornerLayer(myCanvas);
             };
+
         }
         //_____________________________________________________________________________________________________________
         //_____________________________________Rectangle Functions_____________________________________________________
@@ -56,72 +59,67 @@ namespace RevomApp
                     RadiusY = 50,
                     MinWidth = 100,
                     MinHeight = 100,
-                    Cursor = Cursors.SizeAll
+                    Cursor = Cursors.Hand
                 };
                 Canvas.SetLeft(newRect, Mouse.GetPosition(myCanvas).X - newRect.Width / 2);
                 Canvas.SetTop(newRect, Mouse.GetPosition(myCanvas).Y - newRect.Height / 2);
 
                 //Add rect to Canvas
                 myCanvas.Children.Add(newRect);
+
+                //clear previous border
+                RemoveBorderAdorner(activeBorder);
+
                 //Set the Focus to the rect
-                newRect.MouseLeftButtonDown += Set_Focus;
+                activeRect = newRect;
+
+                //create new BorderAdorner and add it to the AdornerLayer
+                activeBorder = new BorderAdorner(activeRect);
+                adornerLayer.Add((Adorner)activeBorder);
+
                 //drawing is not allowed anymore
                 Change_Drawstate(sender, e);
             }
         }
 
-
-        //selects a certain rect, gets called when rect is created or user clicks on a rect
+        //Set the Focus to either the Canvas or a Rect, gets called LeftMouseButtonUp
         private void Set_Focus(object sender, MouseButtonEventArgs e)
         {
-            
             if (drawAllowed)
             {
                 Add_Item(sender, e);
             }
             else if (e.OriginalSource is Rectangle)
             {
+                //set clicked-rect as the activeRect
+                Rectangle r = e.OriginalSource as Rectangle;
+
+                activeRect = r;
+
+                //clear previous border
+                RemoveBorderAdorner(activeBorder);
+
                 //create new BorderAdorner and add it to the AdornerLayer
-                Rectangle activeRect = (Rectangle)e.OriginalSource;
-                adornerLayer.Add(new BorderAdorner(activeRect));
+                activeBorder = new BorderAdorner(activeRect);
+                adornerLayer.Add((Adorner)activeBorder);
 
-                //capture Mouse coordinates within the activeRect
-                _posInRect = Mouse.GetPosition(activeRect);
-                //Make the Rectangle movable >> https://stackoverflow.com/questions/17194110/place-a-moveable-reactangle-on-an-wpf-image-control
-                //activeRect.MouseLeftButtonDown += StartMoveRectangle;
-                IsMouseDown = true;
-                activeRect.MouseLeftButtonUp += EndMoveRectangle;
-                activeRect.MouseMove += MoveRectangle;
             }
-            else
+            else // if clicked somewhere else on the canvas
             {
-                //clear adornerLayer
-                var adornersOfStackPanel = adornerLayer.GetAdorners(myCanvas);
-                if (adornersOfStackPanel != null)
+                //clear previous Border if exists
+                RemoveBorderAdorner(activeBorder);
+                activeRect = null;
+            }
+        }
+        private void RemoveBorderAdorner(BorderAdorner borderAdorner)
+        {
+            if (activeBorder != null)
+            {
+                AdornerLayer aL = AdornerLayer.GetAdornerLayer(activeBorder);
+                if (aL != null)
                 {
-                    foreach (var adorner in adornersOfStackPanel)
-                    {
-                        adornerLayer.Remove(adorner);
-                    }
+                    aL.Remove(activeBorder);
                 }
-            }
-        }
-        private void EndMoveRectangle(object sender, MouseEventArgs e)
-        {
-            IsMouseDown = false;
-            e.Handled = true;
-        }
-        //moves a selected Rectangle by MouseMove
-        private void MoveRectangle(object sender, MouseEventArgs e)
-        {
-            if (e.OriginalSource is Rectangle && IsMouseDown)
-            {
-                Rectangle rect = (Rectangle)e.OriginalSource;
-                double _startX = _posInRect.X;
-                double _startY = _posInRect.Y;
-
-                Canvas.SetLeft(rect, Mouse.GetPosition(myCanvas).X - _startX);
-                Canvas.SetTop(rect, Mouse.GetPosition(myCanvas).Y - _startY);
             }
         }
 
@@ -160,9 +158,11 @@ namespace RevomApp
         private void Load_Canvas(object sender, RoutedEventArgs e)
         {
             //clear current canvas
-            Clear_Canvas(sender, e);
-
-            //if canvas was cleared
+            if (myCanvas.Children.Count != 0)
+            {
+                Clear_Canvas(sender, e);
+            }
+            //if canvas is clear
             if(myCanvas.Children.Count == 0) 
             {
                 //get filepath by userdialog
