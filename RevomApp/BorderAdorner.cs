@@ -219,6 +219,10 @@ namespace RevomApp
             double collisionOffset = rectLength/2;
 
             // Render White Rectangle Outline
+            //Border border = new Border();
+            //border.BorderBrush = renderBrush;
+            //border.BorderThickness = new Thickness(10);
+            //border.Child = childElement;
 
             // Points pointing to the middle of each side.
             Point m_top = new Point((rec.TopLeft.X + rec.TopRight.X) / 2, (rec.TopLeft.Y + rec.TopRight.Y) / 2);

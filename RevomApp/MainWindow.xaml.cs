@@ -17,6 +17,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Markup;
 
 namespace RevomApp
 {
@@ -25,12 +26,8 @@ namespace RevomApp
     /// </summary>
     public partial class MainWindow : Window
     {
-        Brush customColor;
-        Random r = new Random();
         AdornerLayer adornerLayer;
         bool drawAllowed = false;
-        bool IsMouseDown;
-        private Point _posInRect; //saves the MousePosition within a Rectangle before the movement
         BorderAdorner activeBorder;
         Rectangle activeRect;
 
@@ -40,16 +37,16 @@ namespace RevomApp
             Loaded += (sender, e) => {
                 adornerLayer = AdornerLayer.GetAdornerLayer(myCanvas);
             };
-
         }
         //_____________________________________________________________________________________________________________
         //_____________________________________Rectangle Functions_____________________________________________________
         //_____________________________________________________________________________________________________________
-        private void Add_Item(object sender, MouseButtonEventArgs e)
+        private void Draw_Rect(object sender, MouseButtonEventArgs e)
         {
             if (drawAllowed)
             {
-                customColor = new SolidColorBrush(Color.FromRgb((byte)r.Next(1, 255), (byte)r.Next(1, 255), (byte)r.Next(1, 255)));
+                Random r = new Random();
+                Brush customColor = new SolidColorBrush(Color.FromRgb((byte)r.Next(1, 255), (byte)r.Next(1, 255), (byte)r.Next(1, 255)));
                 Rectangle newRect = new Rectangle() {
                     Width = 100,
                     Height = 100,
@@ -64,52 +61,27 @@ namespace RevomApp
                 Canvas.SetLeft(newRect, Mouse.GetPosition(myCanvas).X - newRect.Width / 2);
                 Canvas.SetTop(newRect, Mouse.GetPosition(myCanvas).Y - newRect.Height / 2);
 
-                //Add rect to Canvas
+                // Add rect to Canvas
                 myCanvas.Children.Add(newRect);
 
-                //clear previous border
-                RemoveBorderAdorner(activeBorder);
+                // Set Focus on the newRect
+                Set_Rect_Focus(newRect);
 
-                //Set the Focus to the rect
-                activeRect = newRect;
-
-                //create new BorderAdorner and add it to the AdornerLayer
-                activeBorder = new BorderAdorner(activeRect);
-                adornerLayer.Add((Adorner)activeBorder);
-
-                //drawing is not allowed anymore
+                // It's not allowed to Draw anymore
                 Change_Drawstate(sender, e);
             }
         }
-
-        //Set the Focus to either the Canvas or a Rect, gets called LeftMouseButtonUp
-        private void Set_Focus(object sender, MouseButtonEventArgs e)
+        private void Set_Rect_Focus(Rectangle r)
         {
-            if (drawAllowed)
-            {
-                Add_Item(sender, e);
-            }
-            else if (e.OriginalSource is Rectangle)
-            {
-                //set clicked-rect as the activeRect
-                Rectangle r = e.OriginalSource as Rectangle;
+            // Set given Rect as Active
+            activeRect = r;
 
-                activeRect = r;
+            //clear previous border
+            RemoveBorderAdorner(activeBorder);
 
-                //clear previous border
-                RemoveBorderAdorner(activeBorder);
-
-                //create new BorderAdorner and add it to the AdornerLayer
-                activeBorder = new BorderAdorner(activeRect);
-                adornerLayer.Add((Adorner)activeBorder);
-
-            }
-            else // if clicked somewhere else on the canvas
-            {
-                //clear previous Border if exists
-                RemoveBorderAdorner(activeBorder);
-                activeRect = null;
-            }
+            //create new BorderAdorner and add it to the AdornerLayer
+            activeBorder = new BorderAdorner(activeRect);
+            adornerLayer.Add((Adorner)activeBorder);
         }
         private void RemoveBorderAdorner(BorderAdorner borderAdorner)
         {
@@ -139,7 +111,7 @@ namespace RevomApp
             }
         }
         //_____________________________________________________________________________________________________________
-        //_______________________________________Canvas Options________________________________________________________
+        //_______________________________________Canvas Functions______________________________________________________
         //_____________________________________________________________________________________________________________
 
         private void Save_Canvas(object sender, RoutedEventArgs e)
@@ -205,6 +177,58 @@ namespace RevomApp
                     break;
                 default:
                     break;
+            }
+        }
+
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                // Escape is pressed
+                RemoveBorderAdorner(activeBorder);
+            }
+            else if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                if(e.Key == Key.C)
+                {
+                    // Ctrl + C is pressed
+                    // Save Rect to Clipboard
+                    string xaml = XamlWriter.Save(activeRect);
+                    Clipboard.SetData(DataFormats.Xaml, xaml);
+                }
+                else if(e.Key == Key.V)
+                {
+                    // Ctrl + C is pressed
+                    // Get Rect from Clipboard
+                    string xaml = (string)Clipboard.GetData(DataFormats.Xaml);
+                    if (xaml != null)
+                    {
+                        Rectangle copiedRec = XamlReader.Parse(xaml) as Rectangle;
+                        // Add Rect to Canvas and focus on it
+                        myCanvas.Children.Add(copiedRec);
+                        Canvas.SetLeft(copiedRec, Mouse.GetPosition(myCanvas).X - newRect.Width / 2);
+                        Set_Rect_Focus(copiedRec);
+                    }
+                }
+            }
+        }
+        private void myCanvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (drawAllowed)
+            {
+                Draw_Rect(sender, e);
+            }
+            else if (e.OriginalSource is Rectangle)
+            {
+                //set clicked-rect as the activeRect
+                Rectangle r = e.OriginalSource as Rectangle;
+                Set_Rect_Focus(r);
+            }
+            else // if clicked somewhere else on the canvas
+            {
+                //clear previous Border if exists
+                RemoveBorderAdorner(activeBorder);
+                activeRect = null;
             }
         }
     }
