@@ -37,7 +37,7 @@ namespace RevomApp
                 double vert = e.VerticalChange;
 
                 _posInRect = Mouse.GetPosition(childElement);
-
+                
                 Canvas.SetLeft(childElement, Mouse.GetPosition(childElement.Parent as Canvas).X - _posInRect.X + hor);
                 Canvas.SetTop(childElement, Mouse.GetPosition(childElement.Parent as Canvas).Y - _posInRect.Y + vert );
                 e.Handled = true;

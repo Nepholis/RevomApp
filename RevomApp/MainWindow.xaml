@@ -15,7 +15,7 @@
             <ToggleButton x:Name="Button_New_Rec" Content="New Rec" Background="#FF2BDF13" HorizontalAlignment="Left" VerticalAlignment="Top" Click="Change_Drawstate" Height="39" Width="60" IsChecked="False"/>
 
         </Menu>
-        <Canvas Name="myCanvas" Background="Black" Focusable="True" AllowDrop="True" MouseLeftButtonUp="myCanvas_MouseLeftButtonUp"  MouseRightButtonUp="Remove_Selected_Item" Cursor="IBeam">
+        <Canvas Name="myCanvas" Background="Black" Focusable="True" AllowDrop="True" MouseLeftButtonUp="myCanvas_MouseLeftButtonUp"  MouseRightButtonUp="Remove_Selected_Item" Cursor="Arrow">
 
         </Canvas>
     </DockPanel>

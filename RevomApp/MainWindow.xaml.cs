@@ -30,7 +30,6 @@ namespace RevomApp
         bool drawAllowed = false;
         BorderAdorner activeBorder;
         Rectangle activeRect;
-
         public MainWindow()
         {
             InitializeComponent();
@@ -56,6 +55,8 @@ namespace RevomApp
                     RadiusY = 50,
                     MinWidth = 100,
                     MinHeight = 100,
+                    //MaxWidth = myCanvas.Width,
+                    //MaxHeight = myCanvas.Height,
                     Cursor = Cursors.Hand
                 };
                 Canvas.SetLeft(newRect, Mouse.GetPosition(myCanvas).X - newRect.Width / 2);
@@ -94,7 +95,6 @@ namespace RevomApp
                 }
             }
         }
-
         // changes the drawAllowed variable and the look of the New_Rec_Button
         private void Change_Drawstate(object sender, RoutedEventArgs e)
         {
@@ -113,7 +113,6 @@ namespace RevomApp
         //_____________________________________________________________________________________________________________
         //_______________________________________Canvas Functions______________________________________________________
         //_____________________________________________________________________________________________________________
-
         private void Save_Canvas(object sender, RoutedEventArgs e)
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
@@ -166,7 +165,9 @@ namespace RevomApp
         }
         private void Clear_Canvas(object sender, RoutedEventArgs e)
         {
-            MessageBoxResult result = System.Windows.MessageBox.Show("Would you like to save your changes?", "Save your Changes?", System.Windows.MessageBoxButton.YesNoCancel);
+            MessageBoxResult result = System.Windows.MessageBox.Show("Would you like to save your changes?",
+                                                                     "Save your Changes?",
+                                                                     System.Windows.MessageBoxButton.YesNoCancel);
             switch (result)
             {
                 case MessageBoxResult.Yes:
@@ -179,7 +180,6 @@ namespace RevomApp
                     break;
             }
         }
-
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Escape)
@@ -206,7 +206,9 @@ namespace RevomApp
                         Rectangle copiedRec = XamlReader.Parse(xaml) as Rectangle;
                         // Add Rect to Canvas and focus on it
                         myCanvas.Children.Add(copiedRec);
-                        Canvas.SetLeft(copiedRec, Mouse.GetPosition(myCanvas).X - newRect.Width / 2);
+                        /*TODO Move the new Rectangle down and right a bit, so it's distingushed from the original */
+                        //Canvas.SetLeft(copiedRec, copiedRec.Width);
+                        //Canvas.SetTop(copiedRec, copiedRec.Height);
                         Set_Rect_Focus(copiedRec);
                     }
                 }
